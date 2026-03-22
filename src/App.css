@@ -703,14 +703,46 @@ button:hover {
 
 .budget-category-row {
   display: grid;
-  grid-template-columns: minmax(100px, auto) 1fr;
+  grid-template-columns: 1fr 140px;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   width: 100%;
 }
 
 .budget-category-row label {
   margin-bottom: 0;
+}
+
+.budget-dollar-wrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid #d4af37;
+  border-radius: 5px;
+  background: rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+}
+
+.budget-dollar-sign {
+  padding: 0 8px;
+  color: #d4af37;
+  font-weight: bold;
+  user-select: none;
+}
+
+.budget-dollar-wrap input {
+  border: none !important;
+  background: transparent !important;
+  flex: 1;
+  min-width: 0;
+  padding: 10px 8px 10px 0;
+  color: #f5deb3;
+  font-family: 'Georgia', serif;
+  font-size: 1em;
+  text-align: center;
+}
+
+.budget-dollar-wrap input:focus {
+  outline: none;
 }
 
 .budget-input-with-btn {

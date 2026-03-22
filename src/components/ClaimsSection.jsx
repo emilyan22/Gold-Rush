@@ -37,8 +37,10 @@ const Claim = ({ cat, current, max }) => {
   );
 };
 
+const CATEGORY_ORDER = ['Homestead', 'Provisions', 'Saloon & Fun', 'Transport', 'Other'];
+
 export default function ClaimsSection({ budgetLimits, spentByCategory }) {
-  const categories = Object.keys(budgetLimits);
+  const categories = CATEGORY_ORDER.filter(cat => cat in budgetLimits);
 
   if (categories.length === 0) {
     return (

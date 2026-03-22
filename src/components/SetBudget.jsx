@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import NumericInput from './NumericInput';
 
+const CATEGORIES = ['Homestead', 'Provisions', 'Saloon & Fun', 'Transport', 'Other'];
+
 const CATEGORY_EMOJI = {
   Homestead:      '🏠',
   Provisions:     '🍽️',
@@ -9,61 +11,33 @@ const CATEGORY_EMOJI = {
   Other:          '💼',
 };
 
-const emoji = (cat) => CATEGORY_EMOJI[cat] || '📌';
-
 export default function SetBudget({ budgetLimits, onSaveBudget }) {
-  const [form, setForm] = useState({ ...budgetLimits });
-  const [newCatName, setNewCatName] = useState('');
-  const [newCatAmount, setNewCatAmount] = useState('');
+  const [form, setForm] = useState(() =>
+    Object.fromEntries(CATEGORIES.map(cat => [cat, budgetLimits[cat] ?? 0]))
+  );
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setForm({ ...budgetLimits });
+    setForm(Object.fromEntries(CATEGORIES.map(cat => [cat, budgetLimits[cat] ?? 0])));
   }, [budgetLimits]);
 
-  const categories = Object.keys(form);
-  const total = categories.reduce((sum, cat) => sum + (parseFloat(form[cat]) || 0), 0);
+  const total = CATEGORIES.reduce((sum, cat) => sum + (parseFloat(form[cat]) || 0), 0);
 
   const handleChange = (cat, value) => {
-    const parsed = parseFloat(value);
-    setForm(prev => ({ ...prev, [cat]: isNaN(parsed) ? '' : parsed }));
-    setSaved(false);
-  };
-
-  const handleAddCategory = () => {
-    const name = newCatName.trim();
-    if (!name) { alert('⚠️ Please enter a category name.'); return; }
-    if (form[name] !== undefined) { alert(`⚠️ "${name}" already exists.`); return; }
-    const amount = parseFloat(newCatAmount);
-    if (isNaN(amount) || amount < 0) { alert('⚠️ Please enter a valid budget amount.'); return; }
-    setForm(prev => ({ ...prev, [name]: amount }));
-    setNewCatName('');
-    setNewCatAmount('');
-    setSaved(false);
-  };
-
-  const handleRemoveCategory = (cat) => {
-    setForm(prev => {
-      const next = { ...prev };
-      delete next[cat];
-      return next;
-    });
+    setForm(prev => ({ ...prev, [cat]: value }));
     setSaved(false);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (categories.length === 0) {
-      alert('⚠️ Add at least one category before saving.');
-      return;
-    }
-    for (const cat of categories) {
-      if (form[cat] === '' || form[cat] < 0) {
+    for (const cat of CATEGORIES) {
+      const parsed = parseFloat(form[cat]);
+      if (form[cat] === '' || isNaN(parsed) || parsed < 0) {
         alert(`⚠️ Please enter a valid amount for "${cat}".`);
         return;
       }
     }
-    onSaveBudget({ ...form });
+    onSaveBudget(Object.fromEntries(CATEGORIES.map(cat => [cat, parseFloat(form[cat]) || 0])));
     setSaved(true);
   };
 
@@ -74,58 +48,26 @@ export default function SetBudget({ budgetLimits, onSaveBudget }) {
 
       <form onSubmit={handleSubmit} className="budget-form">
         <div className="budget-total-display">
-          Total Budget: <strong>{categories.length === 0 ? '—' : `$${total.toFixed(2)}`}</strong>
+          Total Budget: <strong>${total.toFixed(2)}</strong>
         </div>
 
         <div className="budget-categories">
           <h3>Your Claims</h3>
-          {categories.length === 0 && (
-            <p style={{ color: '#d4af37', fontSize: '0.9em' }}>No categories yet. Add one below.</p>
-          )}
-          {categories.map(cat => (
-            <div key={cat} className="form-group budget-category-row">
-              <label>{emoji(cat)} {cat}</label>
-              <div className="budget-input-with-btn">
+          {CATEGORIES.map(cat => (
+            <div key={cat} className="form-group">
+              <label>{CATEGORY_EMOJI[cat]} {cat}</label>
+              <div className="budget-dollar-wrap">
+                <span className="budget-dollar-sign">$</span>
                 <NumericInput
                   value={form[cat]}
                   onChange={(raw) => handleChange(cat, raw)}
-                  placeholder="0"
+                  placeholder="0.00"
                   allowDecimal={true}
+                  style={{ textAlign: 'center' }}
                 />
-                <button
-                  type="button"
-                  className="remove-cat-btn"
-                  onClick={() => handleRemoveCategory(cat)}
-                  title={`Remove ${cat}`}
-                >
-                  ✕
-                </button>
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="add-category-section">
-          <h3>Add a Category</h3>
-          <div className="add-category-row">
-            <input
-              type="text"
-              placeholder="e.g. Medicine, Pet Care..."
-              value={newCatName}
-              onChange={(e) => { setNewCatName(e.target.value); setSaved(false); }}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCategory())}
-            />
-            <NumericInput
-              placeholder="$0"
-              value={newCatAmount}
-              onChange={setNewCatAmount}
-              allowDecimal={true}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddCategory())}
-            />
-            <button type="button" className="primary-btn" onClick={handleAddCategory}>
-              + Add
-            </button>
-          </div>
         </div>
 
         <button type="submit" className="primary-btn budget-save-btn">
