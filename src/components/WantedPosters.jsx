@@ -185,6 +185,11 @@ function OutlawCard({ rank, displayName, categoryOverage, photoURL }) {
         ${categoryOverage.toFixed(2)} over category budgets
       </div>
 
+      {/* Tagline */}
+      <div style={{ marginBottom: 12, fontSize: '0.72em', color: '#6b4c1e', fontStyle: 'italic' }}>
+        {OUTLAW_TAGLINES[(rank - 1) % OUTLAW_TAGLINES.length]}
+      </div>
+
       {/* Reward */}
       <div style={{
         background: '#8b0000', color: '#e8dcc4',
