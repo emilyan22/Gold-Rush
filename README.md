@@ -1,144 +1,111 @@
 # 🏴‍☠️ Gold Rush - Wild West Budget Dashboard
 
-A fun, gamified budget tracking app themed like a Wild West gold rush! Watch your gold pile, catch bandits stealing your splurges, and compete on the wanted poster leaderboard.
+A gamified budget tracking app themed like the Wild West! Watch your gold pile, catch bandits stealing your splurges, compete on the leaderboard with friends, and connect your real bank account via Plaid.
 
-## ✨ Features
+## Features
 
 - **Gold Pile Visualization**: Watch your monthly budget deplete visually as you spend
-- **Budget Claims**: Organize spending into themed categories (Homestead, Provisions, Saloon & Fun, Transport)
-- **Bandit Heist Animation**: When you splurge on non-essentials, pixelated bandits animate across the screen stealing your gold!
-- **Wanted Poster Leaderboard**: Compete with friends - ranked by savings amount in authentic wild west wanted poster format
-- **Plaid Bank Integration**: Connect your real bank account to auto-sync transactions (sandbox mode for testing)
-- **Transaction Dispatch Feed**: See your recent transactions with automatic categorization
+- **Budget Claims**: Organize spending into categories (Homestead, Provisions, Saloon & Fun, Transport)
+- **Bandit Heist Animation**: Splurge on non-essentials and pixelated bandits steal your gold!
+- **Leaderboard**: Compete with friends — Top Tycoons (best savers) and Most Wanted (biggest spenders)
+- **Profile Pictures**: Upload a profile photo that shows on the leaderboard
+- **Plaid Bank Integration**: Connect your real bank account to auto-import transactions (sandbox mode for testing)
+- **Firestore Sync**: Transactions and budgets persist across sessions in real-time
+- **Add Friends**: Challenge friends by adding them to your leaderboard
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Node.js (v14 or higher)
-- npm or yarn
-- A free Firebase account (for user authentication)
+- Node.js (v18 recommended)
+- npm
+- Firebase account
+- Plaid developer account (for bank integration)
 
-### Setup
-
-1. **Clone/Navigate to the project**
-   ```bash
-   cd /Users/victoriaxiao/HooHacks
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Set up Firebase Auth** (REQUIRED for login/signup)
-   - Follow the [Firebase Setup Guide](./FIREBASE_SETUP.md)
-   - Add your Firebase credentials to `.env`
-
-4. **Start the app**
-   ```bash
-   npm start
-   ```
-   
-   Opens at `http://localhost:3000`
-
-5. **Create an account**
-   - Sign up with any email and password
-   - Start tracking your budget!
-
-## 📋 How to Use
-
-### Authentication
-
-1. **Sign Up**
-   - Create a new account with an email and password
-   - Choose your "Outlaw Name" (your alias)
-
-2. **Log In**
-   - Use your email and password to access your account
-   - Each user has their own gold rush dashboard!
-
-3. **Log Out**
-   - Click the **Logout** button in the top right
-
-### Test Features
-
-1. **Click splurge buttons** in the "Test Splurge Transactions" section
-   - Watch bandits animate and steal gold
-   - See your gold pile shrink in real-time
-   - Transaction appears in the dispatches feed
-
-2. **Add your friends to the leaderboard**
-   - Fill in the "Post a Wanted Notice" form
-   - Enter your friend's name, their budget, and how much they saved
-   - Click "Post" to add them to the wanted posters
-   - The leaderboard ranks by savings amount!
-
-## 🎨 Design Highlights
-
-- **Gold Pile**: Layered SVG with animated depletion
-- **Wanted Posters**: Tilted, aged-paper aesthetic with rankings
-- **Bandit Sprites**: Pixelated outlaws with ride-in animation
-- **Color Scheme**: Warm golds (#ffd700, #d4af37) on dark wood backgrounds (#2c2416)
-- **Typography**: Georgia serif font for authentic wild west feel
-
-## 📱 Responsive Design
-
-Works on desktop and tablet. Mobile is simplified for smaller screens.
-
-## 🔗 File Structure
-
+### 1. Clone the repo
+```bash
+git clone https://github.com/l3mxny/HooHacks.git
+cd HooHacks
 ```
-/Users/victoriaxiao/HooHacks/
-├── gold_rush_visual_dashboard.html    # Main dashboard (open in browser)
-├── server.js                           # Backend with Plaid integration
-├── package.json                        # Node.js dependencies
-├── .env.example                        # Template for environment variables
-└── .env                                # Your actual credentials (don't commit!)
+
+### 2. Install dependencies
+```bash
+npm install
+npm install plaid express cors dotenv
 ```
+
+### 3. Set up your `.env` file
+Create a `.env` file in the project root with:
+```
+REACT_APP_FIREBASE_API_KEY=your_key
+REACT_APP_FIREBASE_AUTH_DOMAIN=your_domain
+REACT_APP_FIREBASE_PROJECT_ID=your_project_id
+REACT_APP_FIREBASE_STORAGE_BUCKET=your_bucket
+REACT_APP_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+REACT_APP_FIREBASE_APP_ID=your_app_id
+
+PLAID_CLIENT_ID=your_plaid_client_id
+PLAID_SECRET=your_plaid_sandbox_secret
+```
+
+- **Firebase keys**: Firebase Console → Project Settings → Your Apps
+- **Plaid keys**: dashboard.plaid.com → Developers → Keys
+
+### 4. Run the app
+
+You need **two terminals** open at the same time:
+
+**Terminal 1** — Backend server (Plaid):
+```bash
+node server.js
+```
+
+**Terminal 2** — React frontend:
+```bash
+npm start
+```
+
+App opens at `http://localhost:3000`
+
+## 🧪 Testing Plaid (Sandbox)
+
+1. Click **"Connect Your Bank via Plaid"**
+2. Select **"First Platypus Bank"**
+3. Username: `user_good` / Password: `pass_good`
+4. Verification code: `1234`
+5. Transactions auto-import into your dashboard!
 
 ## 🔐 Security Notes
 
-- **Never commit `.env` to GitHub** - it contains your Plaid keys
-- Plaid never sees real bank credentials - just your transactions
-- In production, use a real database to store access tokens (not in-memory)
-- Consider adding user authentication for multi-user support
+- **Never commit `.env`** — it contains your API keys
+- Plaid sandbox uses fake bank data only — no real credentials
+- In production, store Plaid access tokens in a database, not in memory
 
-## 🚀 Future Enhancements
+## 📁 File Structure
 
-- Real-time spending alerts
-- Budget goal tracking
-- Multi-account support
-- Mobile app version
-- Integration with more financial institutions
-- Recurring transaction detection
-- Savings goals with milestone animations
-
-## 💡 Plaid Sandbox Testing
-
-Sandbox mode is perfect for development! You get:
-- Fake bank accounts with pre-populated transactions
-- No real banking credentials needed
-- Instant connections
-- Test data for all scenarios
-
-When ready for production:
-1. Apply for Plaid production access
-2. Change `PlaidEnvironments.sandbox` → `PlaidEnvironments.production`
-3. Use real banks instead of Platypus Bank
-
-## 🎮 Easter Eggs
-
-- Try clicking bandits rapidly to trigger multiple heists!
-- Splurge enough times and your gold pile will be completely empty
-- Different wanted poster rotations based on savings percentage
-
-## 📞 Support
-
-For issues:
-1. Make sure the server is running on `http://localhost:3001`
-2. Check that `.env` has valid Plaid credentials
-3. Open browser console (F12) for network errors
-4. Verify Node.js version: `node --version`
+```
+HooHacks/
+├── src/
+│   ├── App.jsx                    # Main app, tabs, state
+│   ├── App.css                    # Global styles
+│   ├── components/
+│   │   ├── AddTransaction.jsx     # Log a transaction
+│   │   ├── ClaimsSection.jsx      # Budget category bars
+│   │   ├── DispatchesFeed.jsx     # Recent transactions
+│   │   ├── GoldPile.jsx           # Animated gold pile
+│   │   ├── ProfilePic.jsx         # Profile photo upload
+│   │   ├── SetBudget.jsx          # Budget configuration
+│   │   ├── WantedPosters.jsx      # Leaderboard
+│   │   ├── AddFriend.jsx          # Add friends
+│   │   └── BanditAnimation.jsx    # Splurge animation
+│   ├── context/
+│   │   ├── AuthContext.jsx        # Firebase auth
+│   │   └── LeaderboardContext.jsx # Friends leaderboard
+│   └── config/
+│       └── firebase.js            # Firebase setup
+├── server.js                      # Express backend (Plaid)
+├── .env                           # API keys (don't commit!)
+└── package.json
+```
 
 ---
 
