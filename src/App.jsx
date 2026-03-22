@@ -28,8 +28,6 @@ const TABS = [
   { id: 'transactions', label: '📨 Recent Transactions' },
   { id: 'add',          label: '💰 Add Transaction' },
   { id: 'budget',       label: '🗺️ Set Budget' },
-  { id: 'friend',       label: '🤠 Add Friend' },
-  { id: 'leaderboard',  label: '🔴 Leaderboard' },
 ];
 
 export default function App() {
@@ -176,17 +174,21 @@ export default function App() {
 
         <div className="tab-content">
           {activeTab === 'home' && (
-            <div className="main-content">
-              <GoldPile
-                goldAmount={goldAmount}
-                monthlyBudget={totalBudget}
-                percentage={percentage}
-                onConnectBank={connectBank}
-              />
-              <ClaimsSection
-                budgetLimits={budgetLimits}
-                spentByCategory={spentByCategory}
-              />
+            <div>
+              <div className="main-content">
+                <GoldPile
+                  goldAmount={goldAmount}
+                  monthlyBudget={totalBudget}
+                  percentage={percentage}
+                  onConnectBank={connectBank}
+                />
+                <ClaimsSection
+                  budgetLimits={budgetLimits}
+                  spentByCategory={spentByCategory}
+                />
+              </div>
+              <WantedPosters />
+              <AddFriend />
             </div>
           )}
 
@@ -210,7 +212,6 @@ export default function App() {
 
           {activeTab === 'friend' && <AddFriend />}
 
-          {activeTab === 'leaderboard' && <WantedPosters />}
         </div>
       </div>
     </div>
