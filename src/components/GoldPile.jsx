@@ -1,21 +1,35 @@
 import React from 'react';
 
+function getGoldPileImage(percentage) {
+  // percentage = how much of budget REMAINING
+  if (percentage >= 50) return '/assets/gold-pile.png';      // little to none spent
+  if (percentage >= 25) return '/assets/gold-pile-half.png';  // around halfway to 75% spent
+  return '/assets/gold-pile-zero.png';                        // majority spent
+}
+
+function getGlowClass(percentage) {
+  if (percentage >= 50) return 'gold-pile-glow';      // full glow
+  if (percentage >= 25) return 'gold-pile-glow half'; // softer glow
+  return 'gold-pile-glow zero';                       // minimal/no glow
+}
+
 export default function GoldPile({ goldAmount, monthlyBudget, percentage, onConnectBank }) {
+  const pileSrc = getGoldPileImage(percentage);
+  const glowClass = getGlowClass(percentage);
+
   return (
     <div className="gold-section">
       <h2>Your Gold Vein</h2>
       <div className="gold-pile-container">
-        <div className="gold-pile-glow">
+        <div className={glowClass}>
           <div className="gold-pile-pulse">
             <img
               id="goldPile"
-              src="/assets/gold-pile.png"
+              src={pileSrc}
               alt="Gold pile"
               className="gold-pile-img"
               style={{
                 opacity: (percentage / 100) * 0.8 + 0.2,
-                transform: `scaleY(${percentage / 100})`,
-                transformOrigin: 'center bottom',
                 transition: 'all 0.3s ease'
               }}
             />

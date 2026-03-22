@@ -137,6 +137,26 @@
   }
 }
 
+/* 50% state - softer glow, less intense than full */
+.gold-pile-glow.half {
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.5)) drop-shadow(0 0 18px rgba(255, 215, 0, 0.3)) drop-shadow(0 0 28px rgba(212, 175, 55, 0.15));
+  animation: goldOutlineGlowHalf 2.5s ease-in-out infinite;
+}
+
+@keyframes goldOutlineGlowHalf {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.45)) drop-shadow(0 0 18px rgba(255, 215, 0, 0.25)) drop-shadow(0 0 28px rgba(212, 175, 55, 0.12));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.55)) drop-shadow(0 0 25px rgba(255, 215, 0, 0.35)) drop-shadow(0 0 35px rgba(212, 175, 55, 0.2));
+  }
+}
+
+/* Zero state - very subtle */
+.gold-pile-glow.zero {
+  filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.2));
+}
+
 .percentage-label {
   position: absolute;
   top: 0;
