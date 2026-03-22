@@ -103,7 +103,7 @@ export default function App() {
   }, [currentUser]);
 
   // Derived values
-  const categories = budgetLimits ? Object.keys(budgetLimits) : [];
+  const categories = ['Homestead', 'Provisions', 'Saloon & Fun', 'Transport', 'Other'];
   const totalBudget = budgetLimits ? Object.values(budgetLimits).reduce((a, b) => a + b, 0) : 0;
   const totalSpent = dispatches.reduce((sum, d) => sum + Math.abs(d.amount), 0);
   const goldAmount = Math.max(0, totalBudget - totalSpent);
