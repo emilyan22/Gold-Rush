@@ -13,6 +13,7 @@ import SetBudget from './components/SetBudget';
 import BanditAnimation from './components/BanditAnimation';
 import Login from './components/Login';
 import Signup from './components/Signup';
+import ProfilePic from './components/ProfilePic';
 
 const DEFAULT_BUDGET = {
   Homestead:      1000,
@@ -174,6 +175,7 @@ export default function App() {
             <p className="subtitle">Pan for Gold, Not Debt</p>
           </div>
           <div className="header-user">
+            <ProfilePic />
             <span className="user-email">{currentUser.email}</span>
             <button onClick={logout} className="logout-btn">Logout</button>
           </div>
