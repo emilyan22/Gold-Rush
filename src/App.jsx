@@ -185,7 +185,42 @@ export default function App() {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ public_token }),
             });
-            alert('✅ Bank connected successfully!');
+
+            // Auto-import transactions from Plaid
+            try {
+              const txnRes = await fetch('/transactions');
+              const txnData = await txnRes.json();
+
+              if (txnData.transactions && txnData.transactions.length > 0) {
+                const CATEGORY_MAP = {
+                  'Food and Drink': 'Provisions',
+                  'Shops': 'Other',
+                  'Travel': 'Transport',
+                  'Recreation': 'Saloon & Fun',
+                  'Payment': 'Other',
+                  'Transfer': 'Other',
+                };
+
+                for (const t of txnData.transactions) {
+                  const plaidCategory = t.category?.[0] || 'Other';
+                  const mappedCategory = CATEGORY_MAP[plaidCategory] || 'Other';
+                  await saveTransactionToFirestore({
+                    description: t.name,
+                    amount: -Math.abs(t.amount),
+                    category: mappedCategory,
+                    date: t.date,
+                    isSplurge: false,
+                    fromPlaid: true,
+                  });
+                }
+                alert(`✅ Bank connected! Imported ${txnData.transactions.length} transactions.`);
+              } else {
+                alert('✅ Bank connected successfully!');
+              }
+            } catch (err) {
+              console.error('Error importing transactions:', err);
+              alert('✅ Bank connected! Could not import transactions.');
+            }
           },
           onExit: (err) => console.log('Plaid exited', err),
           onEvent: (event) => console.log(event),
