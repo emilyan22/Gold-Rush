@@ -42,6 +42,8 @@ export default function App() {
   const [budgetLimits, setBudgetLimits] = useState(null);
   const [hasSetBudget, setHasSetBudget] = useState(false);
   const [dispatches, setDispatches] = useState([]);
+  const [outlawName, setOutlawName] = useState('');
+  const [editingName, setEditingName] = useState(false);
   const [showBandit, setShowBandit] = useState(false);
   const [banditAmount, setBanditAmount] = useState(0);
   const [showNotification, setShowNotification] = useState(false);
@@ -55,6 +57,21 @@ export default function App() {
       .then((data) => setIsPlaidConnected(data.connected))
       .catch(() => {});
   }, [currentUser]);
+
+  // Load display name on login
+  useEffect(() => {
+    if (currentUser) {
+      setOutlawName(currentUser.displayName || currentUser.email.split('@')[0]);
+    }
+  }, [currentUser]);
+
+  const saveOutlawName = async () => {
+    if (!outlawName.trim()) return;
+    await currentUser.updateProfile({ displayName: outlawName.trim() });
+    setEditingName(false);
+    // Update leaderboard doc with new name
+    persistStats(dispatches);
+  };
 
   // Load user budget from Firestore (preserve existing users, N/A for new)
   useEffect(() => {
@@ -94,6 +111,25 @@ export default function App() {
         budgetLimits: limits,
         lastSaved: new Date(),
       }, { merge: true }).catch((err) => console.error('Error saving budget:', err));
+
+      // Update leaderboard stats with new budget
+      const newTotalBudget = Object.values(limits).reduce((a, b) => a + b, 0);
+      const spent = dispatches.reduce((sum, d) => sum + Math.abs(d.amount), 0);
+      const gold = Math.max(0, newTotalBudget - spent);
+      const newSpentByCategory = dispatches.reduce((acc, d) => {
+        if (d.isSplurge) return acc;
+        acc[d.category] = (acc[d.category] || 0) + Math.abs(d.amount);
+        return acc;
+      }, {});
+      saveUserStats({
+        displayName: currentUser.displayName || currentUser.email.split('@')[0],
+        budget: newTotalBudget,
+        spent,
+        saved: gold,
+        savingsPercentage: Math.round((gold / newTotalBudget) * 100),
+        budgetLimits: limits,
+        spentByCategory: newSpentByCategory,
+      });
     }
   };
 
@@ -114,7 +150,8 @@ export default function App() {
 
   // Derived values
   const categories = ['Homestead', 'Provisions', 'Saloon & Fun', 'Transport', 'Other'];
-  const totalBudget = budgetLimits ? Object.values(budgetLimits).reduce((a, b) => a + b, 0) : 0;
+  const effectiveBudget = budgetLimits || DEFAULT_BUDGET;
+  const totalBudget = Object.values(effectiveBudget).reduce((a, b) => a + b, 0);
   const totalSpent = dispatches.reduce((sum, d) => sum + Math.abs(d.amount), 0);
   const goldAmount = Math.max(0, totalBudget - totalSpent);
   const percentage = totalBudget > 0 ? Math.round((goldAmount / totalBudget) * 100) : 0;
@@ -128,12 +165,19 @@ export default function App() {
   const persistStats = (newDispatches) => {
     const spent = newDispatches.reduce((sum, d) => sum + Math.abs(d.amount), 0);
     const gold = Math.max(0, totalBudget - spent);
+    const newSpentByCategory = newDispatches.reduce((acc, d) => {
+      if (d.isSplurge) return acc;
+      acc[d.category] = (acc[d.category] || 0) + Math.abs(d.amount);
+      return acc;
+    }, {});
     saveUserStats({
-      displayName: currentUser.email.split('@')[0],
+      displayName: currentUser.displayName || currentUser.email.split('@')[0],
       budget: totalBudget,
       spent,
       saved: gold,
       savingsPercentage: Math.round((gold / totalBudget) * 100),
+      budgetLimits: budgetLimits || DEFAULT_BUDGET,
+      spentByCategory: newSpentByCategory,
     });
   };
 
@@ -287,7 +331,33 @@ export default function App() {
           </div>
           <div className="header-user">
             <ProfilePic />
-            <span className="user-email">{currentUser.email}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 2 }}>
+              {editingName ? (
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <input
+                    value={outlawName}
+                    onChange={(e) => setOutlawName(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && saveOutlawName()}
+                    style={{
+                      background: 'rgba(0,0,0,0.4)', border: '1px solid #c8a000',
+                      color: '#ffd700', borderRadius: 4, padding: '4px 8px',
+                      fontFamily: 'Georgia, serif', fontSize: '0.9em', width: 130,
+                    }}
+                    autoFocus
+                  />
+                  <button onClick={saveOutlawName} style={{ padding: '4px 10px', fontSize: '0.8em' }}>✓</button>
+                </div>
+              ) : (
+                <span
+                  onClick={() => setEditingName(true)}
+                  title="Click to edit your outlaw name"
+                  style={{ color: '#ffd700', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.95em' }}
+                >
+                  {outlawName} ✏️
+                </span>
+              )}
+              <span className="user-email">{currentUser.email}</span>
+            </div>
             <button onClick={logout} className="logout-btn">Logout</button>
           </div>
         </div>
@@ -320,7 +390,7 @@ export default function App() {
                   isPlaidConnected={isPlaidConnected}
                 />
                 <ClaimsSection
-                  budgetLimits={budgetLimits || {}}
+                  budgetLimits={hasSetBudget ? (budgetLimits || {}) : {}}
                   spentByCategory={spentByCategory}
                 />
               </div>

@@ -28,7 +28,7 @@ export default function Signup({ onSwitchToLogin }) {
     setLoading(true);
 
     try {
-      await signup(email, password);
+      await signup(email, password, displayName);
       // Update profile with display name if needed
       // Navigation happens automatically through App.jsx
     } catch (err) {

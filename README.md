@@ -1,4 +1,4 @@
-# 🏴‍☠️ Gold Rush - Wild West Budget Dashboard
+# ⛏️ Gold Rush - Wild West Budget Dashboard
 
 A gamified budget tracking app themed like the Wild West! Watch your gold pile, catch bandits stealing your splurges, compete on the leaderboard with friends, and connect your real bank account via Plaid.
 
