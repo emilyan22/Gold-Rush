@@ -17,10 +17,13 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   // Signup
-  const signup = async (email, password) => {
+  const signup = async (email, password, displayName) => {
     setError(null);
     try {
       const result = await auth.createUserWithEmailAndPassword(email, password);
+      if (displayName) {
+        await result.user.updateProfile({ displayName });
+      }
       return result;
     } catch (err) {
       setError(err.message);

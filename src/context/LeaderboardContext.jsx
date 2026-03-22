@@ -42,6 +42,8 @@ export const LeaderboardProvider = ({ children }) => {
         spent: stats.spent,
         saved: stats.saved,
         savingsPercentage: stats.savingsPercentage,
+        budgetLimits: stats.budgetLimits || {},
+        spentByCategory: stats.spentByCategory || {},
         lastUpdated: new Date(),
       }, { merge: true });
     } catch (error) {

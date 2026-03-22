@@ -130,8 +130,7 @@ function TycoonCard({ rank, displayName, saved, photoURL }) {
   );
 }
 
-function OutlawCard({ rank, displayName, saved, spent, budget, photoURL }) {
-  const overBy = Math.max(0, spent - budget);
+function OutlawCard({ rank, displayName, categoryOverage, photoURL }) {
   return (
     <div style={{
       background: 'linear-gradient(160deg, #e8dcc4 0%, #d4c49a 100%)',
@@ -183,7 +182,7 @@ function OutlawCard({ rank, displayName, saved, spent, budget, photoURL }) {
 
       {/* Crime caption */}
       <div style={{ color: '#5a3a10', fontSize: '0.85em', fontStyle: 'italic', marginBottom: 16 }}>
-        for going ${overBy.toFixed(2)} over budget
+        ${categoryOverage.toFixed(2)} over category budgets
       </div>
 
       {/* Reward */}
@@ -192,7 +191,7 @@ function OutlawCard({ rank, displayName, saved, spent, budget, photoURL }) {
         padding: '8px 12px', borderRadius: 3,
         fontWeight: 'bold', fontSize: '0.95em', letterSpacing: 1,
       }}>
-        REWARD: ${OUTLAW_REWARDS[rank] || Math.abs(saved).toFixed(2)}
+        REWARD: ${OUTLAW_REWARDS[rank] || categoryOverage.toFixed(2)}
       </div>
     </div>
   );
@@ -213,9 +212,26 @@ export default function WantedPosters() {
     );
   }
 
-  const topSavers = friendsLeaderboard.slice(0, SHOW_N);
-  const worstSavers = [...friendsLeaderboard]
-    .sort((a, b) => a.saved - b.saved)
+  // Calculate total category overage for each user
+  const withOverage = friendsLeaderboard.map((user) => {
+    const budgetLimits = user.budgetLimits || {};
+    const spentByCategory = user.spentByCategory || {};
+    const categoryOverage = Object.keys(budgetLimits).reduce((sum, cat) => {
+      const over = (spentByCategory[cat] || 0) - (budgetLimits[cat] || 0);
+      return sum + Math.max(0, over);
+    }, 0);
+    return { ...user, categoryOverage };
+  });
+
+  // Top Tycoons: sorted by most saved
+  const topSavers = [...withOverage]
+    .sort((a, b) => b.saved - a.saved)
+    .slice(0, SHOW_N);
+
+  // WANTED: sorted by most category overage (can overlap with top tycoons)
+  const worstSavers = [...withOverage]
+    .filter((u) => u.categoryOverage > 0)
+    .sort((a, b) => b.categoryOverage - a.categoryOverage)
     .slice(0, SHOW_N);
 
   return (
@@ -272,23 +288,27 @@ export default function WantedPosters() {
         </div>
         <hr style={{ border: 'none', borderTop: '2px solid #7a1515', margin: '10px 0 22px' }} />
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${Math.min(worstSavers.length, 2)}, 1fr)`,
-          gap: 20,
-        }}>
-          {worstSavers.map((user, idx) => (
-            <OutlawCard
-              key={user.id}
-              rank={idx + 1}
-              displayName={user.displayName}
-              saved={user.saved}
-              spent={user.spent}
-              budget={user.budget}
-              photoURL={user.photoURL}
-            />
-          ))}
-        </div>
+        {worstSavers.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#8b4444', fontStyle: 'italic' }}>
+            Nobody over budget — the frontier is safe! 🤠
+          </p>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: `repeat(${Math.min(worstSavers.length, 2)}, 1fr)`,
+            gap: 20,
+          }}>
+            {worstSavers.map((user, idx) => (
+              <OutlawCard
+                key={user.id}
+                rank={idx + 1}
+                displayName={user.displayName}
+                categoryOverage={user.categoryOverage}
+                photoURL={user.photoURL}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
     </div>
