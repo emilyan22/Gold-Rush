@@ -14,8 +14,10 @@ function getGlowClass(percentage) {
 }
 
 export default function GoldPile({ goldAmount, monthlyBudget, percentage, onConnectBank }) {
-  const pileSrc = getGoldPileImage(percentage);
-  const glowClass = getGlowClass(percentage);
+  const hasBudget = monthlyBudget != null && monthlyBudget > 0;
+  const displayPercent = hasBudget ? percentage : 100;
+  const pileSrc = getGoldPileImage(displayPercent);
+  const glowClass = getGlowClass(displayPercent);
 
   return (
     <div className="gold-section">
@@ -29,18 +31,20 @@ export default function GoldPile({ goldAmount, monthlyBudget, percentage, onConn
               alt="Gold pile"
               className="gold-pile-img"
               style={{
-                opacity: (percentage / 100) * 0.8 + 0.2,
+                opacity: (displayPercent / 100) * 0.8 + 0.2,
                 transition: 'all 0.3s ease'
               }}
             />
           </div>
         </div>
-        <div className="percentage-label">{percentage}%</div>
+        <div className="percentage-label">{hasBudget ? `${percentage}%` : '—'}</div>
       </div>
       <h3 style={{ color: '#d4af37', marginBottom: '20px' }}>
-        Monthly Budget: ${monthlyBudget}
+        Monthly Budget: {hasBudget ? `$${monthlyBudget}` : 'N/A'}
       </h3>
-      <p style={{ marginBottom: '20px' }}>${goldAmount} Remaining</p>
+      <p style={{ marginBottom: '20px' }}>
+        {hasBudget ? `$${goldAmount} Remaining` : 'Set your budget in 🗺️ Set Budget to get started'}
+      </p>
       <button onClick={onConnectBank} className="primary-btn">
         🏦 Connect Your Bank via Plaid
       </button>

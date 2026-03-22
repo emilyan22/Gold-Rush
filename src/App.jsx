@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 import { useAuth } from './context/AuthContext';
 import { useLeaderboard } from './context/LeaderboardContext';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { db } from './config/firebase';
 import GoldPile from './components/GoldPile';
 import ClaimsSection from './components/ClaimsSection';
 import DispatchesFeed from './components/DispatchesFeed';
@@ -36,15 +38,57 @@ export default function App() {
 
   const [authView, setAuthView] = useState('login');
   const [activeTab, setActiveTab] = useState('home');
-  const [budgetLimits, setBudgetLimits] = useState(DEFAULT_BUDGET);
+  const [budgetLimits, setBudgetLimits] = useState(null);
+  const [hasSetBudget, setHasSetBudget] = useState(false);
   const [dispatches, setDispatches] = useState([]);
   const [showBandit, setShowBandit] = useState(false);
   const [banditAmount, setBanditAmount] = useState(0);
   const [showNotification, setShowNotification] = useState(false);
 
+  // Load user budget from Firestore (preserve existing users, N/A for new)
+  useEffect(() => {
+    if (!currentUser) return;
+    const loadBudget = async () => {
+      try {
+        const budgetRef = doc(db, 'userBudgets', currentUser.uid);
+        const budgetSnap = await getDoc(budgetRef);
+        if (budgetSnap.exists() && budgetSnap.data().budgetLimits) {
+          setBudgetLimits(budgetSnap.data().budgetLimits);
+          setHasSetBudget(true);
+        } else {
+          const leaderboardRef = doc(db, 'leaderboard', currentUser.uid);
+          const leaderboardSnap = await getDoc(leaderboardRef);
+          if (leaderboardSnap.exists()) {
+            setBudgetLimits(DEFAULT_BUDGET);
+            setHasSetBudget(true);
+          } else {
+            setBudgetLimits(DEFAULT_BUDGET);
+            setHasSetBudget(false);
+          }
+        }
+      } catch (err) {
+        console.error('Error loading budget:', err);
+        setBudgetLimits(DEFAULT_BUDGET);
+        setHasSetBudget(true);
+      }
+    };
+    loadBudget();
+  }, [currentUser]);
+
+  const handleSaveBudget = (limits) => {
+    setBudgetLimits(limits);
+    setHasSetBudget(true);
+    if (currentUser) {
+      setDoc(doc(db, 'userBudgets', currentUser.uid), {
+        budgetLimits: limits,
+        lastSaved: new Date(),
+      }, { merge: true }).catch((err) => console.error('Error saving budget:', err));
+    }
+  };
+
   // Derived values
-  const categories = Object.keys(budgetLimits);
-  const totalBudget = Object.values(budgetLimits).reduce((a, b) => a + b, 0);
+  const categories = budgetLimits ? Object.keys(budgetLimits) : [];
+  const totalBudget = budgetLimits ? Object.values(budgetLimits).reduce((a, b) => a + b, 0) : 0;
   const totalSpent = dispatches.reduce((sum, d) => sum + Math.abs(d.amount), 0);
   const goldAmount = Math.max(0, totalBudget - totalSpent);
   const percentage = totalBudget > 0 ? Math.round((goldAmount / totalBudget) * 100) : 0;
@@ -178,12 +222,12 @@ export default function App() {
               <div className="main-content">
                 <GoldPile
                   goldAmount={goldAmount}
-                  monthlyBudget={totalBudget}
+                  monthlyBudget={hasSetBudget ? totalBudget : null}
                   percentage={percentage}
                   onConnectBank={connectBank}
                 />
                 <ClaimsSection
-                  budgetLimits={budgetLimits}
+                  budgetLimits={budgetLimits || {}}
                   spentByCategory={spentByCategory}
                 />
               </div>
@@ -205,8 +249,8 @@ export default function App() {
 
           {activeTab === 'budget' && (
             <SetBudget
-              budgetLimits={budgetLimits}
-              onSaveBudget={setBudgetLimits}
+              budgetLimits={budgetLimits || DEFAULT_BUDGET}
+              onSaveBudget={handleSaveBudget}
             />
           )}
 

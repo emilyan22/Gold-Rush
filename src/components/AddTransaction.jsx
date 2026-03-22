@@ -1,6 +1,27 @@
 import React, { useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const today = () => new Date().toISOString().split('T')[0];
+
+const CalendarInput = ({ calendarOpen, onIconClick, ...props }) => (
+  <div className="date-picker-input-wrapper">
+    <input {...props} className="date-picker-input" />
+    <button
+      type="button"
+      className="date-picker-icon-btn"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        onIconClick();
+      }}
+      tabIndex={-1}
+      aria-label="Toggle calendar"
+    >
+      📅
+    </button>
+  </div>
+);
 
 export default function AddTransaction({ categories, onAddTransaction }) {
   const [description, setDescription] = useState('');
@@ -8,6 +29,7 @@ export default function AddTransaction({ categories, onAddTransaction }) {
   const [category, setCategory] = useState(categories[0] || '');
   const [date, setDate] = useState(today());
   const [isSplurge, setIsSplurge] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // Keep selected category valid if categories list changes
   const effectiveCategory = categories.includes(category) ? category : (categories[0] || '');
@@ -66,13 +88,25 @@ export default function AddTransaction({ categories, onAddTransaction }) {
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group date-picker-group">
             <label>Date</label>
-            <input
-              type="date"
-              value={date}
-              max={today()}
-              onChange={(e) => setDate(e.target.value)}
+            <DatePicker
+              selected={date ? new Date(date) : null}
+              onChange={(d) => setDate(d ? d.toISOString().split('T')[0] : '')}
+              onCalendarOpen={() => setCalendarOpen(true)}
+              onCalendarClose={() => setCalendarOpen(false)}
+              open={calendarOpen}
+              onClick={() => setCalendarOpen(true)}
+              maxDate={new Date()}
+              dateFormat="MM/dd/yyyy"
+              calendarClassName="gold-rush-calendar"
+              showPopperArrow={false}
+              customInput={
+                <CalendarInput
+                  calendarOpen={calendarOpen}
+                  onIconClick={() => setCalendarOpen((prev) => !prev)}
+                />
+              }
             />
           </div>
 
@@ -90,15 +124,21 @@ export default function AddTransaction({ categories, onAddTransaction }) {
           </div>
 
           <div className="form-group splurge-toggle">
-            <label className="splurge-label">
-              <input
-                type="checkbox"
-                checked={isSplurge}
-                onChange={(e) => setIsSplurge(e.target.checked)}
-                className="splurge-checkbox"
-              />
-              <span>🏴‍☠️ Mark as Splurge (triggers the bandits!)</span>
-            </label>
+            <div className="splurge-row">
+              <label htmlFor="splurge-check" className="splurge-label">
+                🏴‍☠️ Mark as Splurge (triggers the bandits!)
+              </label>
+              <span className="checkbox-wrap">
+                <input
+                  type="checkbox"
+                  id="splurge-check"
+                  checked={isSplurge}
+                  onChange={(e) => setIsSplurge(e.target.checked)}
+                  className="splurge-checkbox"
+                />
+                <span className="checkbox-box" aria-hidden="true" />
+              </span>
+            </div>
           </div>
 
           <button type="submit" className={isSplurge ? 'splurge-btn' : 'primary-btn'}>

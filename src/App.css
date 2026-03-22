@@ -532,17 +532,19 @@ button:hover {
 
 .form-group input {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #d4af37;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 12px;
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+  background: rgba(45, 38, 28, 0.95);
   color: #f5deb3;
   font-family: 'Georgia', serif;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.1);
 }
 
 .form-group input:focus {
   outline: none;
   border-color: #ffd700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
 }
 
 .form-row {
@@ -783,38 +785,247 @@ button:hover {
 
 .category-select {
   width: 100%;
-  padding: 10px;
-  border: 1px solid #d4af37;
-  border-radius: 5px;
-  background: rgba(0, 0, 0, 0.3);
+  padding: 10px 12px;
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+  background: rgba(45, 38, 28, 0.95);
   color: #f5deb3;
   font-family: 'Georgia', serif;
   font-size: 1em;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.1);
 }
 
 .category-select:focus {
   outline: none;
   border-color: #ffd700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.2);
 }
 
 .splurge-toggle {
   margin-top: 5px;
 }
 
-.splurge-label {
+.splurge-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  cursor: pointer;
-  color: #d4af37;
-  font-weight: bold;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Checkbox - white square only, tight hit area */
+.checkbox-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  align-self: center;
+  margin-top: -6px; /* Nudge up to align with text center */
 }
 
 .splurge-checkbox {
-  width: 18px;
-  height: 18px;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
   cursor: pointer;
-  accent-color: #d4af37;
+}
+
+.checkbox-box {
+  display: block;
+  width: 24px;
+  height: 24px;
+  border: 2px solid #8b7355;
+  border-radius: 4px;
+  background: #fff;
+  pointer-events: none;
+}
+
+.splurge-checkbox:focus-visible ~ .checkbox-box {
+  outline: 2px solid #d4af37;
+  outline-offset: 1px;
+}
+
+.splurge-checkbox:checked ~ .checkbox-box {
+  background: #d4af37;
+  border-color: #ffd700;
+}
+
+.splurge-checkbox:checked ~ .checkbox-box::after {
+  content: '✓';
+  display: block;
+  color: #1a1410;
+  font-size: 15px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 20px;
+}
+
+.splurge-label {
+  cursor: pointer;
+  color: #d4af37;
+  font-weight: bold;
+  margin: 0;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+}
+
+/* Date picker - themed input & visible calendar icon */
+.date-picker-group .react-datepicker-wrapper {
+  width: 100%;
+  display: block;
+  position: relative;
+}
+
+.date-picker-input-wrapper {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.date-picker-input-wrapper .date-picker-input {
+  padding: 10px 44px 10px 12px;
+}
+
+.date-picker-icon-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%) scale(1);
+  background: none;
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+  filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.6));
+  opacity: 0.95;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.date-picker-icon-btn:hover {
+  opacity: 1;
+  transform: translateY(-50%) scale(1.08);
+  filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.8));
+}
+
+.date-picker-input {
+  width: 100%;
+  padding: 10px 44px 10px 12px;
+  border: 2px solid #d4af37;
+  border-radius: 8px;
+  background: rgba(45, 38, 28, 0.95);
+  color: #f5deb3;
+  font-family: 'Georgia', serif;
+  font-size: 1em;
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.15);
+}
+
+.date-picker-input:focus {
+  outline: none;
+  border-color: #ffd700;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.25);
+}
+
+.date-picker-group {
+  position: relative;
+}
+
+/* Themed calendar popover */
+.react-datepicker-popper {
+  z-index: 1100 !important;
+}
+
+.gold-rush-calendar,
+.gold-rush-calendar .react-datepicker__header {
+  background: #2c2416 !important;
+  border-color: #d4af37 !important;
+  color: #f5deb3 !important;
+}
+
+.gold-rush-calendar .react-datepicker__day-name,
+.gold-rush-calendar .react-datepicker__current-month {
+  color: #ffd700 !important;
+}
+
+.gold-rush-calendar .react-datepicker__day {
+  color: #f5deb3 !important;
+}
+
+.gold-rush-calendar .react-datepicker__day:hover {
+  background: rgba(212, 175, 55, 0.3) !important;
+  color: #ffd700 !important;
+}
+
+.gold-rush-calendar .react-datepicker__day--selected,
+.gold-rush-calendar .react-datepicker__day--keyboard-selected {
+  background: #d4af37 !important;
+  color: #1a1410 !important;
+}
+
+.gold-rush-calendar .react-datepicker__day--today {
+  font-weight: bold;
+  color: #ffd700 !important;
+}
+
+.gold-rush-calendar .react-datepicker__navigation-icon::before {
+  border-color: #d4af37 !important;
+}
+
+.gold-rush-calendar .react-datepicker__navigation:hover *::before {
+  border-color: #ffd700 !important;
+}
+
+.gold-rush-calendar .react-datepicker__month-dropdown,
+.gold-rush-calendar .react-datepicker__year-dropdown {
+  background: #2c2416 !important;
+  border-color: #d4af37 !important;
+}
+
+.gold-rush-calendar .react-datepicker__month-option:hover,
+.gold-rush-calendar .react-datepicker__year-option:hover {
+  background: rgba(212, 175, 55, 0.3) !important;
+  color: #ffd700 !important;
+}
+
+.gold-rush-calendar .react-datepicker__header {
+  padding-top: 12px;
+}
+
+.gold-rush-calendar .react-datepicker__day--outside-month {
+  color: #8b7355 !important;
+}
+
+.gold-rush-calendar .react-datepicker__day--disabled {
+  color: #5a4a3a !important;
+}
+
+.gold-rush-calendar .react-datepicker__year-read-view,
+.gold-rush-calendar .react-datepicker__month-read-view {
+  color: #ffd700 !important;
+}
+
+.gold-rush-calendar .react-datepicker__triangle {
+  display: none;
+}
+
+.gold-rush-calendar .react-datepicker__today-button,
+.gold-rush-calendar .react-datepicker__close-icon {
+  background: #d4af37 !important;
+  color: #1a1410 !important;
+  border-color: #ffd700 !important;
+}
+
+.gold-rush-calendar .react-datepicker__today-button:hover,
+.gold-rush-calendar .react-datepicker__close-icon::after:hover {
+  background: #ffd700 !important;
 }
 
 @media (max-width: 768px) {
