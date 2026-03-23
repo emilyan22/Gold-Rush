@@ -2,10 +2,13 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { 
   doc, 
   setDoc, 
+  getDoc,
   onSnapshot,
   query,
   collection,
   orderBy,
+  where,
+  getDocs,
   arrayUnion,
 } from 'firebase/firestore';
 import { db } from '../config/firebase';
@@ -49,22 +52,65 @@ export const LeaderboardProvider = ({ children }) => {
     }
   };
 
+  // Validates email format
+  const isValidEmail = (email) => {
+    const trimmed = email.trim().toLowerCase();
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return regex.test(trimmed);
+  };
+
   // Add a friend by email
   const addFriend = async (friendEmail) => {
-    if (!currentUser) return;
-    
+    if (!currentUser) return false;
+
+    const email = friendEmail.trim().toLowerCase();
+    if (!email) {
+      alert('⚠️ Please enter an email address');
+      return false;
+    }
+
+    if (!isValidEmail(email)) {
+      alert('⚠️ Please enter a valid email address');
+      return false;
+    }
+
+    if (email === (currentUser.email || '').toLowerCase()) {
+      alert('⚠️ You cannot add yourself as a friend');
+      return false;
+    }
+
     try {
-      // Add friend email to current user's friends array
+      // Check if user exists in the system (has a leaderboard entry)
+      const userQuery = query(
+        collection(db, 'leaderboard'),
+        where('email', '==', email)
+      );
+      const snapshot = await getDocs(userQuery);
+
+      if (snapshot.empty) {
+        alert('⚠️ No user found with that email. They need to sign up for Gold Rush first!');
+        return false;
+      }
+
+      // Check if already friends
       const userDocRef = doc(db, 'leaderboard', currentUser.uid);
+      const userSnap = await getDoc(userDocRef);
+      const existingFriends = (userSnap.exists() ? userSnap.data().friends : []) || [];
+      if (existingFriends.map((f) => (f || '').toLowerCase()).includes(email)) {
+        alert('⚠️ You\'re already friends with that person!');
+        return false;
+      }
+
+      // Add friend email to current user's friends array
       await setDoc(userDocRef, {
-        friends: arrayUnion(friendEmail)
+        friends: arrayUnion(email)
       }, { merge: true });
 
-      alert(`✅ Added ${friendEmail} as a friend!`);
+      alert(`✅ Added ${email} as a friend!`);
       return true;
     } catch (error) {
       console.error('Error adding friend:', error);
-      alert('⚠️ Could not add friend. Make sure the email is correct.');
+      alert('⚠️ Could not add friend. Please try again.');
       return false;
     }
   };
@@ -107,9 +153,10 @@ export const LeaderboardProvider = ({ children }) => {
           });
         });
 
-        // Filter to show friends + current user
+        // Filter to show friends + current user (emails compared case-insensitive)
+        const friendEmailsLower = friendEmails.map((e) => (e || '').toLowerCase());
         const filteredLeaderboard = allUsers.filter(user =>
-          friendEmails.includes(user.email) || user.uid === currentUser.uid
+          friendEmailsLower.includes((user.email || '').toLowerCase()) || user.uid === currentUser.uid
         );
 
         setFriendsLeaderboard(filteredLeaderboard);
