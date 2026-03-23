@@ -15,6 +15,7 @@ import BanditAnimation from './components/BanditAnimation';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import ProfilePic from './components/ProfilePic';
+import { Analytics } from "@vercel/analytics/react"
 
 const DEFAULT_BUDGET = {
   Homestead:      1000,

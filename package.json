@@ -4,6 +4,7 @@
   "description": "Gold Rush - A wild west themed budget tracking dashboard with Plaid integration",
   "private": true,
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^5.2.1",
